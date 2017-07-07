@@ -45,7 +45,7 @@ upload = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STD
 stdout = upload.communicate()[0]
 print(stdout)
 
-if 'The build_id of the new build is' in stdout:
+if upload.returncode == 0:
     try:
         app_id = get_substring(stdout, 'appid=', ')')
         build_id = get_substring(stdout, 'The build_id of the new build is "', '"')
@@ -55,7 +55,7 @@ if 'The build_id of the new build is' in stdout:
         print(e)
         sys.exit(1)
 
-    # watch scan status
+    # watch scan status for non-sandbox scans (--break_the_build is mutually exclusive with --sandboxname)
 
     if args.break_the_build:
         command = base_command + ['-action', 'GetBuildInfo', '-appid', app_id, '-buildid', build_id]
@@ -86,4 +86,4 @@ if 'The build_id of the new build is' in stdout:
             time.sleep(args.wait_interval)
 
 else:
-    sys.exit(2)
+    sys.exit(upload.returncode)
