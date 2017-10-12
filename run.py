@@ -41,7 +41,7 @@ base_command = ['java', '-jar', args.api_wrapper_jar, '-vid', args.id, '-vkey', 
 command = base_command + ['-action', 'UploadAndScan', '-createprofile', 'false', '-appname', args.appname, '-version', args.version, '-filepath', 'veracode.zip']
 if args.sandboxname:
     command = command + ['-sandboxname', args.sandboxname]
-upload = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+upload = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=0)
 stdout = upload.communicate()[0]
 print(stdout)
 
