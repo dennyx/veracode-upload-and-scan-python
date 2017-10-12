@@ -67,9 +67,9 @@ if upload.returncode == 0:
             logging.info('<build ' + get_substring(stdout, '<build ', '>') + '>')
 
             if 'results_ready="true"' in stdout:
-                if args.sandboxname:
-                    logging.info('Scan complete in sandbox ' + args.sandboxname)
-                    sys.exit(0)
+                # if args.sandboxname:
+                #     logging.info('Scan complete in sandbox ' + args.sandboxname)
+                #     sys.exit(0)
 
                 if all('policy_compliance_status="' + x not in stdout for x in ['Calculating...', 'Not Assessed']):
                     policy_compliance_status = get_substring(stdout, 'policy_compliance_status="', '"')
