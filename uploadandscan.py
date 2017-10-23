@@ -21,8 +21,9 @@ def printunbuff(string):
 
 
 # args
-parser = argparse.ArgumentParser(description='A Python wrapper to the Veracode Java API jar, providing "break the build" functionality',
-                                 epilog='Any additional parameters will be passed through to the API jar.',
+parser = argparse.ArgumentParser(description='A Python wrapper to the Veracode Java API jar, '
+                                             'providing "break the build" functionality',
+                                 epilog='Any additional arguments will be passed through to the API jar.',
                                  allow_abbrev=False)
 parser.add_argument('apiwrapperjar', help='File path to Veracode API Java wrapper')
 parser.add_argument('vid', help='Veracode API credentials ID')
