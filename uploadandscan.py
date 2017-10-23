@@ -21,13 +21,18 @@ def printunbuff(string):
 
 
 # args
-parser = argparse.ArgumentParser(allow_abbrev=False)
+parser = argparse.ArgumentParser(description='A Python wrapper to the Veracode Java API jar, providing "break the build" functionality',
+                                 epilog='Any additional parameters will be passed through to the API jar.',
+                                 allow_abbrev=False)
 parser.add_argument('apiwrapperjar', help='File path to Veracode API Java wrapper')
 parser.add_argument('vid', help='Veracode API credentials ID')
 parser.add_argument('vkey', help='Veracode API credentials key')
-parser.add_argument('-b', '--breakthebuild', action="store_true", help='Exit code non-zero if scan does not pass policy')
-parser.add_argument('-wi', '--waitinterval', type=int, default=60, help='Time interval in seconds between scan policy status checks, default = 60s')
-parser.add_argument('-wm', '--waitmax', type=int, default=3600, help='Maximum time in seconds to wait for scan to complete, default = 3600s')
+parser.add_argument('-b', '--breakthebuild', action="store_true",
+                    help='Exit code non-zero if scan does not pass policy')
+parser.add_argument('-wi', '--waitinterval', type=int, default=60,
+                    help='Time interval in seconds between scan policy status checks, default = 60s')
+parser.add_argument('-wm', '--waitmax', type=int, default=3600,
+                    help='Maximum time in seconds to wait for scan to complete, default = 3600s')
 args, unparsed = parser.parse_known_args()
 
 # setup
@@ -35,7 +40,8 @@ base_command = ['java', '-jar', args.apiwrapperjar, '-vid', args.vid, '-vkey', a
 
 # uploadandscan wrapper action
 command = base_command + ['-action', 'UploadAndScan'] + unparsed
-printunbuff(now() + 'Running command: ' + ' '.join(['java', '-jar', args.apiwrapperjar, '-vid', args.vid[:6] + '...', '-vkey', '*****', '-action', 'UploadAndScan'] + unparsed))
+printunbuff(now() + 'Running command: ' + ' '.join(['java', '-jar', args.apiwrapperjar, '-vid', args.vid[:6] +
+                                                    '...', '-vkey', '*****', '-action', 'UploadAndScan'] + unparsed))
 upload = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=0)
 printunbuff(upload.stdout.decode())
 
@@ -55,7 +61,9 @@ if upload.returncode == 0:
         while wait_so_far <= args.waitmax:
             time.sleep(args.waitinterval)
             build_info = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            printunbuff(now() + 'Checking scan status [' + str(wait_so_far // args.waitinterval) + '/' + str(args.waitmax // args.waitinterval) + ']')
+            printunbuff(now() + 'Checking scan status [' +
+                        str(wait_so_far // args.waitinterval) + '/' +
+                        str(args.waitmax // args.waitinterval) + ']')
 
             if 'results_ready="true"' in build_info.stdout.decode():
                 # Wait for policy compliance calculation to complete
