@@ -16,6 +16,10 @@ def now():
     return datetime.now().strftime('[%y.%m.%d %H:%M:%S] ')
 
 
+def printunbuff(string):
+    print(string, flush=True)
+
+
 # args
 parser = argparse.ArgumentParser(allow_abbrev=False)
 parser.add_argument('apiwrapperjar', help='File path to Veracode API Java wrapper')
@@ -31,16 +35,16 @@ base_command = ['java', '-jar', args.apiwrapperjar, '-vid', args.vid, '-vkey', a
 
 # uploadandscan wrapper action
 command = base_command + ['-action', 'UploadAndScan'] + unparsed
-print(now() + 'Running command: ' + ' '.join(['java', '-jar', args.apiwrapperjar, '-vid', args.vid[:6]+'...', '-vkey', '*****', '-action', 'UploadAndScan'] + unparsed))
+printunbuff(now() + 'Running command: ' + ' '.join(['java', '-jar', args.apiwrapperjar, '-vid', args.vid[:6] + '...', '-vkey', '*****', '-action', 'UploadAndScan'] + unparsed))
 upload = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=0)
-print(upload.stdout.decode())
+printunbuff(upload.stdout.decode())
 
 if upload.returncode == 0:
     try:
         app_id = get_substring(upload.stdout.decode(), 'appid=', ')')
         build_id = get_substring(upload.stdout.decode(), 'The build_id of the new build is "', '"')
     except ValueError as e:
-        print(e)
+        printunbuff(e)
         sys.exit(1)
 
     # watch scan status for policy pass/fail
@@ -51,14 +55,14 @@ if upload.returncode == 0:
         while wait_so_far <= args.waitmax:
             time.sleep(args.waitinterval)
             build_info = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            print(now() + 'Checking scan status [' + str(wait_so_far//args.waitinterval) + '/' + str(args.waitmax//args.waitinterval) + ']')
+            printunbuff(now() + 'Checking scan status [' + str(wait_so_far // args.waitinterval) + '/' + str(args.waitmax // args.waitinterval) + ']')
 
             if 'results_ready="true"' in build_info.stdout.decode():
                 # Wait for policy compliance calculation to complete
                 while True:
                     policy_compliance_status = get_substring(build_info.stdout.decode(), 'policy_compliance_status="', '"')
                     if policy_compliance_status not in ['Calculating...', 'Not Assessed']:
-                        print(now() + 'Scan complete, policy compliance status: ' + policy_compliance_status)
+                        printunbuff(now() + 'Scan complete, policy compliance status: ' + policy_compliance_status)
                         if policy_compliance_status in ['Conditional Pass', 'Pass']:
                             sys.exit(0)
                         else:
@@ -66,11 +70,11 @@ if upload.returncode == 0:
                     else:
                         time.sleep(args.waitinterval)
                         build_info = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-                        print(now() + 'Scan complete, checking policy status')
+                        printunbuff(now() + 'Scan complete, checking policy status')
             else:
                 wait_so_far += args.waitinterval
 
-        print(now() + 'Scan did not complete within maximum wait time.')
+        printunbuff(now() + 'Scan did not complete within maximum wait time.')
         sys.exit(1)
 else:
     sys.exit(upload.returncode)
